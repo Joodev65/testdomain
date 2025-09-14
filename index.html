@@ -1,0 +1,55 @@
+<!DOCTYPE html> n
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Chat dengan Gemini 2.5</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; background: #121212; color: #fff; }
+    h2 { color: #00e676; }
+    textarea { width: 100%; padding: 10px; border-radius: 8px; border: none; resize: vertical; }
+    button { margin-top: 10px; padding: 10px 20px; border: none; border-radius: 8px; background: #00e676; color: #000; font-weight: bold; cursor: pointer; }
+    button:hover { background: #1de9b6; }
+    pre { background: #1e1e1e; padding: 15px; border-radius: 8px; margin-top: 20px; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h2>💬 Chat dengan Gemini 2.5 Flash</h2>
+  <textarea id="input" rows="4" placeholder="Tulis pesan di sini..."></textarea><br>
+  <button onclick="sendMessage()">Kirim</button>
+  <pre id="output">Tunggu jawaban di sini...</pre>
+
+  <script>
+    const API_KEY = "AIzaSyBqxmXKOnC143trXp04VCpjG3aedCRr8ME";
+    const API_URL = "https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=" + API_KEY;
+
+    async function sendMessage() {
+      const input = document.getElementById("input").value;
+      const output = document.getElementById("output");
+
+      if (!input.trim()) {
+        output.textContent = "⚠️ Teks kosong, coba ketik sesuatu.";
+        return;
+      }
+
+      output.textContent = "⏳ Tunggu sebentar...";
+
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ contents: [{ parts: [{ text: input }] }] })
+        });
+
+        const data = await response.json();
+        if (data.candidates && data.candidates[0].content.parts[0].text) {
+          output.textContent = data.candidates[0].content.parts[0].text;
+        } else {
+          output.textContent = "⚠️ Error: " + JSON.stringify(data, null, 2);
+        }
+      } catch (error) {
+        output.textContent = "❌ Fetch error: " + error;
+      }
+    }
+  </script>
+</body>
+</html>
