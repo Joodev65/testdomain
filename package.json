@@ -1,0 +1,7 @@
+{
+  "name": "hash-api",
+  "version": "1.0.0",
+  "description": "Vercel serverless function - SHA-256 hash endpoint",
+  "type": "module",
+  "private": true
+}
