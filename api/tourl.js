@@ -1,9 +1,9 @@
-const axios = require('axios');
-const FormData = require('form-data');
+import axios from 'axios';
+import FormData from 'form-data';
 
 const IMGBB_API_KEY = 'b30e0f0760d2de4cbb1b7ef3ab2a39e4';
 
-module.exports = async (req, res) => {
+export default async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,POST');
@@ -82,7 +82,6 @@ module.exports = async (req, res) => {
         retry++;
         if (retry === 3) break;
         
-
         const delay = 1000 * retry;
         console.log(`Retrying in ${delay}ms...`);
         await new Promise(resolve => setTimeout(resolve, delay));
