@@ -3,6 +3,8 @@ import FormData from 'form-data';
 
 const IMGBB_API_KEY = 'b30e0f0760d2de4cbb1b7ef3ab2a39e4';
 
+const requestCache = new Map();
+
 export default async (req, res) => {
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -44,24 +46,42 @@ export default async (req, res) => {
 
     console.log('Processing image URL:', imageUrl);
 
+    const cacheKey = `img_${Buffer.from(imageUrl).toString('base64')}`;
+    if (requestCache.has(cacheKey)) {
+      const cached = requestCache.get(cacheKey);
+      console.log('Returning cached result');
+      return res.status(200).json(cached);
+    }
+
     const fileResponse = await axios.get(imageUrl, {
       responseType: 'arraybuffer',
-      timeout: 30000,
+      timeout: 15000,  
+      maxContentLength: 10 * 1024 * 1024, 
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
       }
     });
- 
+
+    if (fileResponse.data.length > 8 * 1024 * 1024) {
+      return res.status(400).json({
+        success: false,
+        error: 'File terlalu besar (max 8MB)'
+      });
+    }
+
     const form = new FormData();
-    form.append('image', Buffer.from(fileResponse.data), 'photo.jpg');
+    form.append('image', Buffer.from(fileResponse.data), {
+      filename: `joo_${Date.now()}.jpg`,
+      contentType: 'image/jpeg'
+    });
     form.append('key', IMGBB_API_KEY);
-    form.append('name', 'joo_' + Date.now());
+    form.append('name', `joo_${Date.now()}`);
 
     let imgbbResponse;
     let retry = 0;
     let lastError;
 
-    while (retry < 3) {
+    while (retry < 2) {  
       try {
         console.log(`Upload attempt ${retry + 1} to ImgBB`);
         
@@ -69,7 +89,7 @@ export default async (req, res) => {
           headers: {
             ...form.getHeaders(),
           },
-          timeout: 60000,
+          timeout: 30000,  
         });
 
         if (imgbbResponse.data?.status === 200 && imgbbResponse.data?.data?.url) {
@@ -80,7 +100,7 @@ export default async (req, res) => {
       } catch (err) {
         lastError = err;
         retry++;
-        if (retry === 3) break;
+        if (retry === 2) break;
         
         const delay = 1000 * retry;
         console.log(`Retrying in ${delay}ms...`);
@@ -88,13 +108,13 @@ export default async (req, res) => {
       }
     }
 
-    if (retry === 3 && lastError) {
+    if (retry === 2 && lastError) {
       throw lastError;
     }
 
     const { url, thumb, delete_url, display_url, size, expiration } = imgbbResponse.data.data;
 
-    return res.status(200).json({
+    const responseData = {
       success: true,
       message: 'Berhasil upload image ke URL',
       data: {
@@ -110,7 +130,15 @@ export default async (req, res) => {
           uploaded_at: new Date().toISOString()
         }
       }
-    });
+    };
+
+    requestCache.set(cacheKey, responseData);
+    setTimeout(() => {
+      requestCache.delete(cacheKey);
+    }, 5 * 60 * 1000);
+
+    console.log('Upload successful');
+    return res.status(200).json(responseData);
 
   } catch (error) {
     console.error('[Tourl API] Error:', error.response?.data || error.message);
@@ -124,10 +152,13 @@ export default async (req, res) => {
                     'ImgBB API error';
       statusCode = error.response.status;
     } else if (error.code === 'ECONNABORTED') {
-      errorMessage = 'Request timeout';
+      errorMessage = 'Request timeout - coba gambar yang lebih kecil';
       statusCode = 408;
     } else if (error.message.includes('Invalid URL')) {
       errorMessage = 'URL tidak valid';
+      statusCode = 400;
+    } else if (error.message.includes('File terlalu besar')) {
+      errorMessage = 'File terlalu besar (max 8MB)';
       statusCode = 400;
     } else {
       errorMessage = error.message;
