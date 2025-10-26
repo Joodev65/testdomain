@@ -1,19 +1,21 @@
 {
-  "name": "joomodss-api",
+  "name": "7ooModdss APi",
   "version": "1.0.0",
-  "description": "Multiple APIs",
-  "type": "commonjs",
-  "private": true,
+  "description": "Rest APi",
+  "main": "index.js",
+  "type": "module",
   "scripts": {
-    "dev": "vercel dev",
-    "start": "node api/osint.js"
+    "dev": "nodemon api/music.js",
+    "start": "node api/music.js"
   },
   "dependencies": {
-    "axios": "^1.6.0",
-    "crypto": "^1.0.1",
-    "form-data": "^4.0.0"
+    "axios": "^1.6.8",
+    "express": "^4.19.2",
+    "node-fetch": "^3.3.2",
+    "form-data": "^4.0.0",
+    "multer": "^1.4.5-lts.1"
   },
-  "engines": {
-    "node": "18.x"
+  "devDependencies": {
+    "nodemon": "^3.1.0"
   }
 }
