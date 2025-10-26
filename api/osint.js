@@ -1,13 +1,10 @@
 const axios = require('axios');
 
-const VALID_API_KEYS = ['INDAH'];
-
 module.exports = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, X-API-Key');
-
+  res.setHeader('Access-Control-Allow-Headers', 'X-API-Key');
+  
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
@@ -17,32 +14,27 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const apiKey = req.headers['x-api-key'];
-    if (!apiKey || !VALID_API_KEYS.includes(apiKey)) {
+    const { number, apikey } = req.query;
+
+    if (!apikey || apikey !== 'INDAH') {
       return res.status(401).json({ 
-        error: 'Unauthorized',
-        message: 'Invalid API Key. Buy access at: t.me/Jcodeest4r'
+        error: 'Invalid API Key',
+        message: 'Buy access: t.me/Jcodeest4r'
       });
     }
 
-    const { number } = req.query;
     if (!number) {
       return res.status(400).json({ 
         error: 'Number is required',
-        example: '?number=628123456789'
+        example: '/api/osint?number=628123456789&apikey='
       });
     }
 
-    if (!/^\d+$/.test(number)) {
-      return res.status(400).json({ 
-        error: 'Invalid number format',
-        message: 'Number should contain only digits'
-      });
-    }
+    const cleanNumber = number.replace(/\D/g, '');
 
     const [api1, api2] = await Promise.allSettled([
       axios.get(
-        `https://whatsapp-data1.p.rapidapi.com/number/${number}?base64=false&telegram=false&google=false`,
+        `https://whatsapp-data1.p.rapidapi.com/number/${cleanNumber}?base64=false&telegram=false&google=false`,
         {
           headers: {
             'x-rapidapi-host': 'whatsapp-data1.p.rapidapi.com',
@@ -52,7 +44,7 @@ module.exports = async (req, res) => {
         }
       ),
       axios.get(
-        `https://whatsapp-data1.p.rapidapi.com/number/no_picture/${number}?base64=false&telegram=false&google=false`,
+        `https://whatsapp-data1.p.rapidapi.com/number/no_picture/${cleanNumber}?base64=false&telegram=false&google=false`,
         {
           headers: {
             'x-rapidapi-host': 'whatsapp-data1.p.rapidapi.com', 
@@ -69,28 +61,25 @@ module.exports = async (req, res) => {
     if ((!data1 && !data2) || (data1?.exists === false && data2?.exists === false)) {
       return res.status(404).json({ 
         error: 'Number not found',
-        message: 'WhatsApp account not found or does not exist'
+        message: 'WhatsApp account not found'
       });
     }
 
     const combinedData = { 
       success: true,
-      number: number,
+      number: cleanNumber,
+      timestamp: new Date().toISOString(),
       ...data1,
-      ...data2,
-      profile_pic: data1?.profilePic || null,
-      timestamp: new Date().toISOString()
+      ...data2
     };
 
-    delete combinedData.profilePic;
-
-    return res.status(200).json(combinedData);
+    res.json(combinedData);
 
   } catch (error) {
-    console.error('Osint Api Error:', error);
-    return res.status(500).json({ 
-      error: 'Internal server error',
-      message: 'Failed to fetch WhatsApp information'
+    console.error('API Error:', error.message);
+    res.status(500).json({ 
+      error: 'Server error',
+      message: 'Failed to fetch WhatsApp data'
     });
   }
 };
