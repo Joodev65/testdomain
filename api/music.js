@@ -1,3 +1,5 @@
+// ᴅᴇᴘʟᴏʏ ᴛᴇʀᴘɪsᴀʜ
+
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS");
@@ -11,7 +13,7 @@ export default async function handler(req, res) {
   if (!query) return res.status(400).json({ error: "Missing query parameter" });
 
   try {
-    const apiUrl = `https://ochinpo-helper.hf.space/yt?query=${encodeURIComponent(query)}`;
+    const apiUrl = `https://faa-jian.my.id/search/spotify?q=${encodeURIComponent(query)}`;
     const r = await fetch(apiUrl);
     const data = await r.json();
 
@@ -21,23 +23,15 @@ export default async function handler(req, res) {
     const result = data.result;
 
     const formatted = {
-      success: true,
-      result: {
-        type: result.type,
-        videoId: result.videoId,
-        url: result.url,
-        title: result.title,
-        description: result.description,
-        image: result.image,
-        thumbnail: result.thumbnail,
-        seconds: result.seconds,
-        timestamp: result.timestamp,
-        duration: result.duration,
-        ago: result.ago,
-        views: result.views,
-        author: result.author,
-        download: result.download
-      }
+      status: true,
+      title: result.title || null,
+      artist: result.author || null,
+      duration: result.duration || null,
+      album: result.album || null,
+      release_date: result.release_date || null,
+      thumbnail: result.thumbnail || result.image || null,
+      spotify_url: result.url || null,
+      download: `https://spotifyapi.caliphdev.com/api/download/track?url=${encodeURIComponent(result.url)}`
     };
 
     return res.status(200).json(formatted);
