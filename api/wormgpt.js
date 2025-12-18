@@ -1,4 +1,5 @@
 const OpenAI = require("openai");
+const fetch = require("node-fetch");
 
 const pastebinRaw = "https://pastebin.com/raw/HYBHTXSy";
 
