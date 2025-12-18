@@ -4,7 +4,7 @@ export const config = {
   runtime: "nodejs"
 };
 
-const pastebinRaw = "https://pastebin.com/raw/HYBHTXSy";
+const pastebinRaw = "https://pastebin.com/raw/kfuEKJJ6";
 
 let apiKeyCache = null;
 let cacheTime = 0;
