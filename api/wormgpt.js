@@ -1,6 +1,9 @@
+export const config = {
+  runtime: "nodejs"
+};
+
 const OpenAI = require("openai");
 const fetch = require("node-fetch");
-
 const pastebinRaw = "https://pastebin.com/raw/HYBHTXSy";
 
 let apiKeyCache = null;
