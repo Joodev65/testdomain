@@ -1,31 +1,35 @@
-const PASTEBIN_RAW = "https://pastebin.com/raw/HYBHTXSy";
-const GEMINI_URL =
-  "https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=";
+import OpenAI from "openai";
 
-let API_KEY_CACHE = null;
-let CACHE_TIME = 0;
-const CACHE_TTL_MS = 1000 * 60 * 5;
+export const config = {
+  runtime: "nodejs"
+};
+
+const pastebinRaw = "https://pastebin.com/raw/kfuEKJJ6";
+
+let apiKeyCache = null;
+let cacheTime = 0;
+const cacheTtl = 1000 * 60 * 5;
 
 async function getApiKey() {
   const now = Date.now();
-  if (API_KEY_CACHE && now - CACHE_TIME < CACHE_TTL_MS) {
-    return API_KEY_CACHE;
+  if (apiKeyCache && now - cacheTime < cacheTtl) {
+    return apiKeyCache;
   }
 
-  const res = await fetch(PASTEBIN_RAW);
-  if (!res.ok) throw new Error("Failed to fetch API key: " + res.status);
+  const r = await fetch(pastebinRaw);
+  if (!r.ok) throw new Error("gagal ambil api key");
 
-  const key = (await res.text()).trim();
-  if (!key) throw new Error("Empty API key");
+  const key = (await r.text()).trim();
+  if (!key) throw new Error("api key kosong");
 
-  API_KEY_CACHE = key;
-  CACHE_TIME = now;
+  apiKeyCache = key;
+  cacheTime = now;
   return key;
 }
 
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
   if (req.method === "OPTIONS") {
@@ -35,9 +39,9 @@ export default async function handler(req, res) {
   try {
     if (req.method === "GET") {
       return res.status(200).json({
-        status: "POST",
-        message: "Ini POST bukan GET",
-        creator: "7ooModss"
+        status: true,
+        message: "Only Post",
+        model: "openai/gpt-oss-20b"
       });
     }
 
@@ -45,16 +49,17 @@ export default async function handler(req, res) {
       return res.status(405).json({ error: "Method not allowed" });
     }
 
-    const { message } = req.body ?? {};
-    if (!message?.trim()) {
-      return res.status(400).json({ error: "Message is required" });
-    }
-
-    if (message.length > 6000) {
-      return res.status(400).json({ error: "Message too long" });
+    const { message } = req.body || {};
+    if (!message || !message.trim()) {
+      return res.status(400).json({ error: "Message wajib" });
     }
 
     const apiKey = await getApiKey();
+
+    const client = new OpenAI({
+      apiKey,
+      baseURL: "https://api.groq.com/openai/v1"
+    });
 
     const systemPrompt = `
 Kamu adalah asisten AI cerdas bernama Joocode AI.
@@ -63,38 +68,22 @@ Kamu punya gaya seperti Claude, ChatGPT, Gemini, dan Blackbox: pintar, analitis,
 Jika ada pertanyaan teknis, jawab detail. Jika ringan, jawab fun.
 Kalau ada yang tanya "Siapa pencipta Joocode Official?", jawab: "Joocode Official diciptakan oleh Jose Timoty."
 Jangan pernah keluar dari peran ini.
-`;
+    `.trim();
 
-    const payload = {
-      contents: [
-        {
-          role: "user",
-          parts: [
-            {
-              text: `${systemPrompt}\n\nUser:\n${message}`
-            }
-          ]
-        }
+    const response = await client.responses.create({
+      model: "openai/gpt-oss-20b",
+      input: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: message }
       ]
-    };
-
-    const gRes = await fetch(GEMINI_URL + apiKey, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
     });
 
-    const data = await gRes.json();
+    return res.status(200).json({
+      success: true,
+      response: response.output_text
+    });
 
-    if (!gRes.ok) {
-      return res.status(gRes.status).json({
-        error: data?.error?.message || "Gemini error"
-      });
-    }
-
-    return res.status(200).json(data);
-
-  } catch (err) {
-    return res.status(500).json({ error: err.message });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
   }
 }
