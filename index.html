@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REST API Documentation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-black: #0a0a0a;
+            --secondary-black: #1a1a1a;
+            --primary-white: #ffffff;
+            --secondary-white: #f5f5f5;
+            --accent-gray: #888888;
+            --border-gray: #333333;
+            --success-green: #00ff88;
+            --error-red: #ff4444;
+            --method-get: #00ff88;
+            --method-post: #ffaa00;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--primary-black);
+            color: var(--primary-white);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            background: var(--secondary-black);
+            border-bottom: 1px solid var(--border-gray);
+            padding: 2rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--primary-white) 0%, var(--accent-gray) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            color: var(--accent-gray);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        .base-url {
+            background: var(--primary-black);
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-gray);
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: var(--success-green);
+        }
+
+        main {
+            padding: 3rem 0;
+        }
+
+        .section {
+            margin-bottom: 4rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .endpoint-card {
+            background: var(--secondary-black);
+            border: 1px solid var(--border-gray);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .endpoint-card:hover {
+            border-color: var(--accent-gray);
+            transform: translateY(-2px);
+        }
+
+        .endpoint-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .method-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .method-get {
+            background: rgba(0, 255, 136, 0.1);
+            color: var(--method-get);
+            border: 1px solid var(--method-get);
+        }
+
+        .method-post {
+            background: rgba(255, 170, 0, 0.1);
+            color: var(--method-post);
+            border: 1px solid var(--method-post);
+        }
+
+        .endpoint-path {
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+            color: var(--primary-white);
+            word-break: break-all;
+        }
+
+        .description {
+            color: var(--accent-gray);
+            margin-bottom: 1.5rem;
+            line-height: 1.7;
+        }
+
+        .params-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .params-title {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--primary-white);
+            margin-bottom: 0.75rem;
+        }
+
+        .params-list {
+            background: var(--primary-black);
+            border-radius: 8px;
+            padding: 1rem;
+            border: 1px solid var(--border-gray);
+        }
+
+        .param-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border-gray);
+        }
+
+        .param-item:last-child {
+            border-bottom: none;
+        }
+
+        .param-name {
+            font-family: 'Courier New', monospace;
+            color: var(--success-green);
+            font-size: 0.9rem;
+        }
+
+        .param-type {
+            color: var(--accent-gray);
+            font-size: 0.8rem;
+        }
+
+        .param-desc {
+            color: var(--accent-gray);
+            font-size: 0.85rem;
+            margin-top: 0.25rem;
+        }
+
+        .example-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .example-box {
+            background: var(--primary-black);
+            border-radius: 8px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-gray);
+        }
+
+        .example-title {
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .code-block {
+            background: #0d0d0d;
+            border: 1px solid var(--border-gray);
+            border-radius: 6px;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .response-success {
+            color: var(--success-green);
+        }
+
+        .response-error {
+            color: var(--error-red);
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .example-section {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .endpoint-card {
+                padding: 1.5rem;
+            }
+        }
+
+        .icon {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border-gray);
+            border-top-color: var(--primary-white);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div>
+                    <h1>REST API Documentation</h1>
+                    <p class="subtitle">Professional & Modern API Reference</p>
+                </div>
+                <div class="base-url">
+                    https://aliicia.my.id
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <section class="section fade-in">
+                <h2 class="section-title">
+                    <svg class="icon" viewBox="0 0 24 24">
+                        <path d="M9 3v2H7V3h2m4 0v2h-2V3h2m4 0v2h-2V3h2M9 7v2H7V7h2m4 0v2h-2V7h2m4 0v2h-2V7h2M9 11v2H7v-2h2m4 0v2h-2v-2h2m4 0v2h-2v-2h2M9 15v2H7v-2h2m4 0v2h-2v-2h2m4 0v2h-2v-2h2M9 19v2H7v-2h2m4 0v2h-2v-2h2m4 0v2h-2v-2h2z"/>
+                    </svg>
+                    GET Endpoints
+                </h2>
+
+                <div class="endpoint-card">
+                    <div class="endpoint-header">
+                        <span class="method-badge method-get">GET</span>
+                        <span class="endpoint-path">/api/brat</span>
+                    </div>
+                    <p class="description">Generate Brat themed images with customizable text and animation options.</p>
+                    
+                    <div class="params-section">
+                        <div class="params-title">Parameters</div>
+                        <div class="params-list">
+                            <div class="param-item">
+                                <div>
+                                    <div class="param-name">text</div>
+                                    <div class="param-desc">Text to display on the image (required)</div>
+                                </div>
+                                <span class="param-type">string</span>
+                            </div>
+                            <div class="param-item">
+                                <div>
+                                    <div class="param-name">isAnimated</div>
+                                    <div class="param-desc">Enable animation effect</div>
+                                </div>
+                                <span class="param-type">boolean</span>
+                            </div>
+                            <div class="param-item">
+                                <div>
+                                    <div class="param-name">delay</div>
+                                    <div class="param-desc">Animation delay in milliseconds</div>
+                                </div>
+                                <span class="param-type">number</span>
+                            </div>
+                            <div class="param-item">
+                                <div>
+                                    <div class="param-name">type</div>
+                                    <div class="param-desc">Response type: json or redirect</div>
+                                </div>
+                                <span class="param-type">string</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="example-section">
+                        <div class="example-box">
+                            <div class="example-title">
+                                <svg class="icon" viewBox="0 0 24 24">
+                                    <path d="M8 3v3H5v2h3v3h2V8h3V5h-3V3H8m5 10v3h-2v-3h-3v-2h3v-3h2v3h3v2h-3z"/>
+                                </svg>
+                                Example Request
+                            </div>
+                            <div class="code-block">GET /api/brat?text=Hello&isAnimated=true&delay=1000&type=json</div>
+                        </div>
+                        <div class="example-box">
+                            <div class="example-title">
+                                <svg class="icon" viewBox="0 0 24 24">
+                                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/>
+                                </svg>
+                                Example Response
+                            </div>
+                            <div class="code-block response-success">{
+  "success": true,
+  "url": "data:image/png;base64,...",
+  "result": {
+    "url": "https://example.com/image.png"
+  }
+}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="endpoint-card">
+                    <div class="endpoint-header">
+                        <span class="method-badge method-get">GET</span>
+                        <span class="endpoint-path">/api/hd</span>
+                    </div>
+                    <p class="description">Upscale images to HD quality using AI enhancement.</p>
+                    
+                    <div class="params-section">
+                        <div class="params-title">Parameters</div>
+                        <div class="params-list">
+                            <div class="param-item">
+                                <div>
+                                    <div class="param-name">url</div>
+                                    <div class="param-desc">Image URL to upscale (required)</div>
+                                </div>
+                                <span class="param-type">string</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="example-section">
+                        <div class="example-box">
+                            <div class="example-title">
+                                <svg class="icon" viewBox="0 0 24 24">
+                                    <path d="M8 3v3H5v2h3v3h2V8h3V5h-3V3H8m5 10v3h-2v-3h-3v-2h3v-3h2v3h3v2h-3z"/>
+                                </svg>
+                                Example Request
+                            </div>
+                            <div class="code-block">GET /api/hd?url=https://example.com/image.jpg</div>
+                        </div>
+                        <div class="example-box">
+                            <div class="example-title">
+                                <svg class="icon" viewBox="0 0 24 24">
+                                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/>
+                                </svg>
+                                Example Response
+                            </div>
+                            <div class="code-block response-success">{
+  "success": true,
+  "result": {
+    "upscaled_url": "https://example.com/upscaled.jpg"
+  }
+}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="endpoint-card">
+                    <div class="endpoint-header">
+                        <span class="method-badge method-get">GET</span>
+                        <span class="endpoint-path">/api/tiktok</span>
+                    </div>
+                    <p class="description">Download TikTok videos without watermark.</p>
+                    
+                    <div class="params-section">
+                        <div class="params-title">Parameters</div>
+                        <div class="params-list">
+                            <div class="param-item">
+                                <div>
+                                    <div class="param-name">url</div>
+                                    <div class="param-desc">TikTok video URL (required)</div>
+                                </div>
+                                <span class="param-type">string</span>
+                            </div>
+                            <div class="param-item">
+                                <div>
+                                    <div class="param-name">mode</div>
+                                    <div class="param-desc">Response mode: json or redirect</div>
+                                </div>
+                                <span class="param-type">string</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="example-section">
+                        <div class="example-box">
+                            <div class="example-title">
+                                <svg class="icon" viewBox="0 0 24 24">
+                                    <path d="M8 3v3H5v2h3v3h2V8h3V5h-3V3H8m5 10v3h-2v-3h-3v-2h3v-3h2v3h3v2h-3z"/>
+                                </svg>
+                                Example Request
+                            </div>
+                            <div class="code-block">GET /api/tiktok?url=https://tiktok.com/@user/video/123456&mode=json</div>
+                        </div>
+                        <div class="example-box">
+                            <div class="example-title">
+                                <svg class="icon" viewBox="0 0 24 24">
+                                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/>
+                                </svg>
+                                Example Response
+                            </div>
+                            <div class="code-block response-success">{
+  "id": "123456",
+  "caption": "Video title",
+  "play": "https://example.com/video.mp4",
+  "music": "https://example.com/music.mp3",
+  "author": "username"
+}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="endpoint-card">
+                    <div class="endpoint-header">
+                        <span class="method-badge method-get">GET</span>
+                        <span class="endpoint-path">/api/react</span>
+                    </div>
+                    <p class="description">React to WhatsApp channel posts with emojis.</p>
+                    
+                    <div class="params-section">
+                        <div class="params-title">Parameters</div>
+                        <div class="params-list">
+                            <div class="param-item">
+                                <div>
+                                    <div class="param-name">link</div>
+                                    <div class="param-desc">WhatsApp channel post link (required)</div>
+                                </div>
+                                <span class="param-type">string</span>
+                            </div>
+                            <div class="param-item">
+                                <div>
+                                    <div class="param-name">emoji</div>
+                                    <div class="param-desc">Comma-separated emojis (required)</div>
+                                </div>
+                                <span class="param-type">string</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="example-section">
+                        <div class="example-box">
+                            <div class="example-title">
+                                <svg class="icon" viewBox="0 0 24 24">
+                                    <path d="M8 3v3H5v2h3v3h2V8h3V5h-3V3H8m5 10v3h-2v-3h-3v-2h3v-3h2v3h3v2h-3z"/>
+                                </svg>
+                                Example Request
+                            </div>
+                            <div class="code-block">GET /api/react?link=https://whatsapp.com/channel/ABC123/456&emoji=❤️,👍,🔥</div>
+                        </div>
+                        <div class="example-box">
+                            <div class="example-title">
+                                <svg class="icon" viewBox="0 0 24 24">
+                                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/>
+                                </svg>
+                                Example Response
+                            </div>
+                            <div class="code-block response-success">{
+  "success": true,
+  "message": "React berhasil dikirim",
+  "emoji": "❤️👍🔥"
+}</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section fade-in">
+                <h2 class="section-title">
+                    <svg class="icon" viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                    </svg>
+                    POST Endpoints
+                </h2>
+
+                <div class="endpoint-card">
+                    <div class="endpoint-header">
+                        <span class="method-badge method-post">POST</span>
+                        <span class="endpoint-path">/api/chatgpt</span>
+                    </div>
+                    <p class="description">AI chat assistant powered by advanced language models.</p>
+                    
+                    <div class="params-section">
+                        <div class="params-title">Parameters</div>
+                        <div class="params-list">
+                            <div class="param-item">
+                                <div>
+                                    <div class="param-name">message</div>
+                                    <div class="param-desc">User message to the AI (required)</div>
+                                </div>
+                                <span class="param-type">string</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="example-section">
+                        <div class="example-box">
+                            <div class="example-title">
+                                <svg class="icon" viewBox="0 0 24 24">
+                                    <path d="M8 3v3H5v2h3v3h2V8h3V5h-3V3H8m5 10v3h-2v-3h-3v-2h3v-3h2v3h3v2h-3z"/>
+                                </svg>
+                                Example Request
+                            </div>
+                            <div class="code-block">POST /api/chatgpt
+Content-Type: application/json
+
+{
+  "message": "What is artificial intelligence?"
+}</div>
+                        </div>
+                        <div class="example-box">
+                            <div class="example-title">
+                                <svg class="icon" viewBox="0 0 24 24">
+                                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/>
+                                </svg>
+                                Example Response
+                            </div>
+                            <div class="code-block response-success">{
+  "success": true,
+  "response": "Artificial Intelligence (AI) refers to the simulation of human intelligence in machines..."
+}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="endpoint-card">
+                    <div class="endpoint-header">
+                        <span class="method-badge method-post">POST</span>
+                        <span class="endpoint-path">/api/wormgpt</span>
+                    </div>
+                    <p class="description">Advanced AI assistant with specialized capabilities.</p>
+                    
+                    <div class="params-section">
+                        <div class="params-title">Parameters</div>
+                        <div class="params-list">
+                            <div class="param-item">
+                                <div>
+                                    <div class="param-name">message</div>
+                                    <div class="param-desc">User message to the AI (required)</div>
+                                </div>
+                                <span class="param-type">string</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="example-section">
+                        <div class="example-box">
+                            <div class="example-title">
+                                <svg class="icon" viewBox="0 0 24 24">
+                                    <path d="M8 3v3H5v2h3v3h2V8h3V5h-3V3H8m5 10v3h-2v-3h-3v-2h3v-3h2v3h3v2h-3z"/>
+                                </svg>
+                                Example Request
+                            </div>
+                            <div class="code-block">POST /api/wormgpt
+Content-Type: application/json
+
+{
+  "message": "Explain quantum computing"
+}</div>
+                        </div>
+                        <div class="example-box">
+                            <div class="example-title">
+                                <svg class="icon" viewBox="0 0 24 24">
+                                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/>
+                                </svg>
+                                Example Response
+                            </div>
+                            <div class="code-block response-success">{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "Quantum computing is a type of computation that harnesses quantum mechanical phenomena..."
+          }
+        ]
+      }
+    }
+  ]
+}</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section fade-in">
+                <h2 class="section-title">
+                    <svg class="icon" viewBox="0 0 24 24">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    </svg>
+                    Error Responses
+                </h2>
+
+                <div class="endpoint-card">
+                    <p class="description">All endpoints return consistent error responses when something goes wrong.</p>
+                    
+                    <div class="example-section">
+                        <div class="example-box">
+                            <div class="example-title">
+                                <svg class="icon" viewBox="0 0 24 24">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                                </svg>
+                                Error Response Format
+                            </div>
+                            <div class="code-block response-error">{
+  "error": "Error message",
+  "message": "Detailed error description",
+  "raw": {} // Optional: Raw error data
+}</div>
+                        </div>
+                        <div class="example-box">
+                            <div class="example-title">
+                                <svg class="icon" viewBox="0 0 24 24">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                                </svg>
+                                Common HTTP Status Codes
+                            </div>
+                            <div class="code-block">
+400 - Bad Request (Missing parameters)
+405 - Method Not Allowed
+429 - Rate Limited
+500 - Internal Server Error</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script>
+        // Add smooth scrolling and fade-in animations
+        document.addEventListener('DOMContentLoaded', function() {
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.endpoint-card').forEach(card => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                observer.observe(card);
+            });
+
+            // Add copy functionality to code blocks
+            document.querySelectorAll('.code-block').forEach(block => {
+                block.style.cursor = 'pointer';
+                block.title = 'Click to copy';
+                
+                block.addEventListener('click', function() {
+                    const text = this.textContent;
+                    navigator.clipboard.writeText(text).then(() => {
+                        const original = this.textContent;
+                        this.textContent = 'Copied!';
+                        this.style.color = 'var(--success-green)';
+                        
+                        setTimeout(() => {
+                            this.textContent = original;
+                            this.style.color = '';
+                        }, 1000);
+                    });
+                });
+            });
+        });
+
+        // Helper function to add new endpoints (for future use)
+        function addEndpoint(method, path, description, params, exampleRequest, exampleResponse) {
+            const endpointCard = document.createElement('div');
+            endpointCard.className = 'endpoint-card fade-in';
+            
+            const methodClass = method.toLowerCase() === 'get' ? 'method-get' : 'method-post';
+            
+            endpointCard.innerHTML = `
+                <div class="endpoint-header">
+                    <span class="method-badge ${methodClass}">${method}</span>
+                    <span class="endpoint-path">${path}</span>
+                </div>
+                <p class="description">${description}</p>
+                
+                <div class="params-section">
+                    <div class="params-title">Parameters</div>
+                    <div class="params-list">
+                        ${params.map(param => `
+                            <div class="param-item">
+                                <div>
+                                    <div class="param-name">${param.name}</div>
+                                    <div class="param-desc">${param.description}</div>
+                                </div>
+                                <span class="param-type">${param.type}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <div class="example-section">
+                    <div class="example-box">
+                        <div class="example-title">
+                            <svg class="icon" viewBox="0 0 24 24">
+                                <path d="M8 3v3H5v2h3v3h2V8h3V5h-3V3H8m5 10v3h-2v-3h-3v-2h3v-3h2v3h3v2h-3z"/>
+                            </svg>
+                            Example Request
+                        </div>
+                        <div class="code-block">${exampleRequest}</div>
+                    </div>
+                    <div class="example-box">
+                        <div class="example-title">
+                            <svg class="icon" viewBox="0 0 24 24">
+                                <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/>
+                            </svg>
+                            Example Response
+                        </div>
+                        <div class="code-block response-success">${exampleResponse}</div>
+                    </div>
+                </div>
+            `;
+            
+            const section = method.toLowerCase() === 'get' 
+                ? document.querySelector('.section:nth-child(1)')
+                : document.querySelector('.section:nth-child(2)');
+                
+            section.appendChild(endpointCard);
+        }
+    </script>
+</body>
+</html>
