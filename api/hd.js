@@ -5,26 +5,28 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { query } = req.query;
-  if (!query) {
-    return res.status(400).json({ error: "Missing query parameter" });
+  const { url } = req.query;
+  if (!url) {
+    return res.status(400).json({ error: "Missing url parameter" });
   }
 
   try {
-    const apiRes = await axios.get(
-      "https://api-faa.my.id/faa/soundcloud-play",
-      {
-        params: { query },
-        timeout: 0
-      }
-    );
+    const apiUrl = "https://ikyyzyyrestapi.my.id/tools/upscale";
 
-    const data = apiRes.data;
+    const response = await axios.get(apiUrl, {
+      params: {
+        apikey: "kyzz",
+        url
+      },
+      timeout: 0
+    });
+
+    const data = response.data;
 
     return res.status(200).json({
       status: true,
       creator: "JooModdss",
-      result: data.result
+      result: data?.result?.result_url || null
     });
 
   } catch (err) {
