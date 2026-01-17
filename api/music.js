@@ -11,7 +11,7 @@ export default async function handler(req, res) {
       if (alicia) {
       const { data } = await axios.get(
         "https://host.optikl.ink/soundcloud/search",
-        { params: { query: query } }
+        { params: { query: alicia } }
       );
 
       return res.status(200).json({
