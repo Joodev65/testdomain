@@ -5,10 +5,10 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { query, alicia, download } = req.query;
+  const { query, download, alicia } = req.query;
 
   try {
-    if (alicia) {
+      if (alicia) {
       const { data } = await axios.get(
         "https://host.optikl.ink/soundcloud/search",
         { params: { query: query } }
@@ -20,14 +20,14 @@ export default async function handler(req, res) {
         result: data
       });
     }
- 
+    
     if (query) {
-      const { data } = await axios.get(
+      const { data: search } = await axios.get(
         "https://host.optikl.ink/soundcloud/search",
         { params: { query } }
       );
 
-      if (!data || !data.length) {
+      if (!search || !search.length) {
         return res.status(404).json({
           status: false,
           creator: "JooModdss",
@@ -35,11 +35,11 @@ export default async function handler(req, res) {
         });
       }
 
-      const top = data[0];
+      const top = search[0];
 
       const { data: dl } = await axios.get(
-        "https://host.optikl.ink/soundcloud/download",
-        { params: { url: top.url } }
+        "https://aliicia.my.id/api/music",
+        { params: { download: top.url } }
       );
 
       return res.status(200).json({
@@ -49,13 +49,13 @@ export default async function handler(req, res) {
           title: top.title,
           thumbnail: top.thumbnail,
           source_url: top.url,
-          download_url: dl.download_url || dl.url
+          download_url: dl.result.download_url
         }
       });
     }
- 
+
     if (download) {
-      const { data } = await axios.get(
+      const { data: dl } = await axios.get(
         "https://host.optikl.ink/soundcloud/download",
         { params: { url: download } }
       );
@@ -63,14 +63,16 @@ export default async function handler(req, res) {
       return res.status(200).json({
         status: true,
         creator: "JooModdss",
-        result: data
+        result: {
+          download_url: dl.download_url || dl.url
+        }
       });
     }
- 
+
     return res.status(400).json({
       status: false,
       creator: "JooModdss",
-      error: "Missing query / alicia / download parameter"
+      error: "Parameter query / alicia / download wajib diisi"
     });
 
   } catch (err) {
