@@ -63,7 +63,7 @@ export default async function handler(req, res) {
         status: true,
         creator: "JooModdss",
         result: {
-          download_url: audio_url
+          download_url: dl.audio_url
         }
       });
     }
